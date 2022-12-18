@@ -34,6 +34,14 @@ namespace Libraries
             OPTIONS
         }
 
+        /// <summary>
+        /// The type of status returned.
+        /// </summary>
+        internal enum HTTPStatus
+        {
+            NotFound = 404
+        }
+
         private RequestType ListenFor;
 
         /// <summary>
@@ -78,7 +86,7 @@ namespace Libraries
                 }
             });
 
-            if (DoShutdown)
+            if (DoShutdown || didError)
             {
                 return;
             }
@@ -102,14 +110,20 @@ namespace Libraries
             Context.Response.ContentLength64 = response.Length;
             Context.Response.OutputStream.Write(response, 0, response.Length);
             Context.Response.OutputStream.Close();
+
+            if (Context.Response.StatusCode == (int)HTTPStatus.NotFound){
+                return Shutdown(true);
+            }
         }
 
         private bool DoShutdown;
 
+        private bool didError = false;
+
         /// <summary>
         /// Shuts down the Web API Instance.
         /// </summary>
-        internal void Shutdown()
+        internal void Shutdown(params bool didError = false)
         {
             Listener.Close();
             DoShutdown = true;
