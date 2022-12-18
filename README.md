@@ -10,7 +10,8 @@ private async void HandleData(string Data, RequestType requestType, HttpListener
 {
     if (requestType == RequestType.POST)
     {
-    
+        // Send a 200 OK response
+        Helper.SendResponse(context, "OK", HttpStatusCode.OK);
     }
 }
 ```
