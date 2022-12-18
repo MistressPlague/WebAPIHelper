@@ -18,5 +18,9 @@ private async void HandleData(string Data, RequestType requestType, HttpListener
 
 Somewhere in your code when you want to start the web api:
 ```csharp
-Helper = new WebAPIHelper(HandleData, $"{token.MakeAlphaNumeric().Substring(0, 5)}", 8000);
+Helper = new WebAPIHelper(HandleData, $"test", 8000);
 ```
+
+This will host on http://{YOURIP}:8000/test
+
+Note it depends on the port being open.
