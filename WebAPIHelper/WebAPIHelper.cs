@@ -1,12 +1,16 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Libraries
 {
+    /// <summary>
+    /// A helper class for creating web APIs.
+    /// </summary>
     internal class WebAPIHelper
     {
         /// <summary>
@@ -33,7 +37,7 @@ namespace Libraries
         private RequestType ListenFor;
 
         /// <summary>
-        /// A Helper class for making web API's.
+        /// Creates a new instance of the <see cref="WebAPIHelper"/> class.
         /// </summary>
         /// <param name="OnReceived">What to do once data is received from a client. Be sure to response by calling SendResponse in this class through this event code.</param>
         /// <param name="DomainDir">The domain directory to bind to, such as "test" would host on http://*:{Port}/test/. Hosts on root if null.</param>
@@ -54,19 +58,29 @@ namespace Libraries
         {
             var context = Listener.GetContext();
 
-            foreach (RequestType value in Enum.GetValues(typeof(RequestType)))
+            Task.Run(() =>
             {
-                if ((ListenFor & value) == value)
+                foreach (RequestType value in Enum.GetValues(typeof(RequestType)))
                 {
-                    if (context.Request.HttpMethod == Enum.GetName(typeof(RequestType), value))
+                    if ((ListenFor & value) == value)
                     {
-                        var jsonData = JsonConvert.SerializeObject(QueryStringHelper.QueryStringToDict(new StreamReader(context.Request.InputStream, context.Request.ContentEncoding).ReadToEnd()));
+                        if (context.Request.HttpMethod == Enum.GetName(typeof(RequestType), value))
+                        {
+                            using var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
 
-                        OnReceived?.Invoke(jsonData, value, context);
+                            var jsonData = JsonConvert.SerializeObject(QueryStringHelper.QueryStringToDict(reader.ReadToEnd()));
 
-                        break;
+                            OnReceived?.Invoke(jsonData, value, context);
+
+                            break;
+                        }
                     }
                 }
+            });
+
+            if (DoShutdown)
+            {
+                return;
             }
 
             CheckForData();
@@ -78,14 +92,27 @@ namespace Libraries
         /// <param name="Context">The context, which defines what client is being responded to, etc.</param>
         /// <param name="Response">The data to respond with. Note this is turned to UTF8 internally.</param>
         /// <param name="ResponseStatusCode">What status code to respond with, such as OK.</param>
-        internal void SendResponse(HttpListenerContext Context, string Response, HttpStatusCode ResponseStatusCode)
+        internal void SendResponse(HttpListenerContext Context, string Response, HttpStatusCode ResponseStatusCode, string ContentType = "application/json")
         {
             var response = Encoding.UTF8.GetBytes(Response);
+
+            Context.Response.ContentType = ContentType;
             Context.Response.StatusCode = (int)ResponseStatusCode;
 
             Context.Response.ContentLength64 = response.Length;
             Context.Response.OutputStream.Write(response, 0, response.Length);
             Context.Response.OutputStream.Close();
+        }
+
+        private bool DoShutdown;
+
+        /// <summary>
+        /// Shuts down the Web API Instance.
+        /// </summary>
+        internal void Shutdown()
+        {
+            Listener.Close();
+            DoShutdown = true;
         }
     }
 }
