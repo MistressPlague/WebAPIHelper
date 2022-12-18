@@ -44,7 +44,7 @@ namespace Libraries
         /// <param name="ListenFor">The type(s) of requests to listen for. You can OR multiple together, such as RequestType.GET | RequestType.POST.</param>
         internal WebAPIHelper(Action<string, RequestType, HttpListenerContext> OnReceived, string DomainDir, int Port, RequestType ListenFor = RequestType.POST)
         {
-            Listener.Prefixes.Add($"http://*:{Port}" + (DomainDir != null ? $"/{DomainDir}/" : "/"));
+            Listener.Prefixes.Add($"http://localhost:{Port}" + (DomainDir != null ? $"/{DomainDir}/" : "/"));
 
             this.ListenFor = ListenFor;
             this.OnReceived = OnReceived;
@@ -67,9 +67,15 @@ namespace Libraries
                         {
                             using var reader = new StreamReader(context.Request.InputStream, context.Request.ContentEncoding);
 
-                            var jsonData = JsonConvert.SerializeObject(QueryStringHelper.QueryStringToDict(reader.ReadToEnd()));
-
-                            OnReceived?.Invoke(jsonData, value, context);
+                            switch (context.Request.ContentType)
+                            {
+                                case "application/x-www-form-urlencoded":
+                                    OnReceived?.Invoke(JsonConvert.SerializeObject(QueryStringHelper.QueryStringToDict(reader.ReadToEnd())), value, context);
+                                    break;
+                                default:
+                                    OnReceived?.Invoke(reader.ReadToEnd(), value, context);
+                                    break;
+                            }
 
                             break;
                         }
