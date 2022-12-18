@@ -86,7 +86,7 @@ namespace Libraries
                 }
             });
 
-            if (DoShutdown || didError)
+            if (DoShutdown)
             {
                 return;
             }
@@ -112,18 +112,16 @@ namespace Libraries
             Context.Response.OutputStream.Close();
 
             if (Context.Response.StatusCode == (int)HTTPStatus.NotFound){
-                return Shutdown(true);
+                return Shutdown();
             }
         }
 
         private bool DoShutdown;
 
-        private bool didError = false;
-
         /// <summary>
         /// Shuts down the Web API Instance.
         /// </summary>
-        internal void Shutdown(params bool didError = false)
+        internal void Shutdown()
         {
             Listener.Close();
             DoShutdown = true;
