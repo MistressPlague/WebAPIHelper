@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Plagues_Booty.Libraries
+namespace Libraries
 {
     internal class QueryStringHelper
     {
