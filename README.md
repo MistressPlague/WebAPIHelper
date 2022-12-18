@@ -10,6 +10,8 @@ private async void HandleData(string Data, RequestType requestType, HttpListener
 {
     if (requestType == RequestType.POST)
     {
+        // Tip: Data will be in json format, regardless of the data received. Only tested with FormUrlEncoded Data.
+    
         // Send a 200 OK response
         Helper.SendResponse(context, "OK", HttpStatusCode.OK);
     }
