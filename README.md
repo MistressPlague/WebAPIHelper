@@ -21,6 +21,6 @@ Somewhere in your code when you want to start the web api:
 Helper = new WebAPIHelper(HandleData, $"test", 8000);
 ```
 
-This will host on http://{YOURIP}:8000/test
+This will host on http://{YOURIP}:8000/test/
 
 Note it depends on the port being open.
