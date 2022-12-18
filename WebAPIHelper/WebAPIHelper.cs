@@ -45,7 +45,7 @@ namespace Libraries
         /// <param name="ListenFor">The type(s) of requests to listen for. You can OR multiple together, such as RequestType.GET | RequestType.POST.</param>
         internal WebAPIHelper(Action<string, RequestType, HttpListenerContext> OnReceived, string DomainDir, int Port, RequestType ListenFor = RequestType.POST)
         {
-            Listener.Prefixes.Add($"http://*:{Port}" + (DomainDir != null ? $"/{DomainDir}/" : ""));
+            Listener.Prefixes.Add($"http://*:{Port}" + (DomainDir != null ? $"/{DomainDir}/" : "/"));
 
             this.ListenFor = ListenFor;
             this.OnReceived = OnReceived;
