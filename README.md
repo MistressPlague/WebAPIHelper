@@ -25,6 +25,6 @@ Helper = new WebAPIHelper(HandleData, "test", 8000);
 
 This will host on http://{YOURIP}:8000/test/
 
-YOURIP being either a domain proxied to your system/servers public IP, or direct. Note it wont have SSL if direct and not proxied. Cloudflare is suggested.
+YOURIP being either a domain proxied to your system/servers public IP, or direct. Note it wont have SSL. Do not use this for any sensitive information or authentication. For that, use something better.
 
 Note it depends on the port being open.
